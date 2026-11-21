@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>寻检车俯视图 · 只看不控</title>
+<style>
+  :root {
+    --bg0: #0b1220; --bg1: #101b30;
+    --grid: #1a2740; --grid-major: #29406b;
+    --car: #f59e0b; --trail: #38bdf8; --text: #e2e8f0; --dim: #8fa3bf;
+    --ok: #4ade80; --warn: #fbbf24; --bad: #f87171;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(1200px 800px at 50% 40%, var(--bg1), var(--bg0) 75%);
+    color: var(--text);
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    overflow: hidden;
+  }
+  canvas { display: block; width: 100vw; height: 100vh; }
+
+  .panel {
+    position: fixed; top: 16px; left: 16px;
+    background: rgba(11, 18, 32, .85); border: 1px solid var(--grid-major);
+    border-radius: 14px; padding: 14px 18px; min-width: 252px;
+    backdrop-filter: blur(8px); box-shadow: 0 8px 30px rgba(0,0,0,.45);
+  }
+  .panel h1 { font-size: 14px; font-weight: 600; margin-bottom: 10px; letter-spacing: 1px; }
+  .panel h1 small { color: var(--dim); font-weight: 400; font-size: 11px; }
+  .row { display: flex; justify-content: space-between; gap: 18px; font-size: 13px; line-height: 2.0; }
+  .row .k { color: var(--dim); }
+  .row .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px;
+         background: var(--bad); vertical-align: 1px; transition: background .3s; }
+  .dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: pulse 2s ease-in-out infinite; }
+  .dot.warn { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+  @keyframes pulse { 50% { opacity: .45; } }
+
+  .barwrap { padding: 0 0 6px; }
+  .bar { display: block; width: 100%; height: 5px; border-radius: 3px; background: #22304d; overflow: hidden; }
+  .bar > i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #22d3ee, #4ade80);
+             transition: width .12s linear; }
+  .bar.low > i { background: linear-gradient(90deg, #f97316, #f87171); }
+
+  .hint {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    font-size: 12px; color: var(--dim); background: rgba(11,18,32,.8);
+    border: 1px solid var(--grid-major); border-radius: 8px; padding: 6px 14px;
+    white-space: nowrap;
+  }
+  label.follow {
+    position: fixed; top: 16px; right: 16px; font-size: 13px; cursor: pointer;
+    background: rgba(11,18,32,.85); border: 1px solid var(--grid-major);
+    border-radius: 8px; padding: 8px 12px; user-select: none; color: var(--text);
+  }
+  #compass {
+    position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    font-size: 12px; color: var(--dim); letter-spacing: 2px;
+    background: rgba(11,18,32,.7); border-radius: 8px; padding: 4px 12px;
+  }
+  #compass b { color: var(--text); }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="compass"><b>N</b> ↑ &nbsp;·&nbsp; W ← → E</div>
+
+<div class="panel">
+  <h1>寻检车俯视图 <small>WebSocket · 只看不控</small></h1>
+  <div class="row"><span class="k">连接</span>
+    <span class="v"><span class="dot" id="dot"></span><span id="st">连接中…</span></span></div>
+  <div class="row"><span class="k">速度</span><span class="v" id="vSpeed">0.00 m/s</span></div>
+  <div class="barwrap"><span class="bar" id="barSpeed"><i style="width:0%"></i></span></div>
+  <div class="row"><span class="k">电量</span><span class="v" id="vBatt">100 %</span></div>
+  <div class="barwrap"><span class="bar" id="barBatt"><i style="width:100%"></i></span></div>
+  <div class="row"><span class="k">朝向</span><span class="v" id="vHead">0.0 °</span></div>
+  <div class="row"><span class="k">位置</span><span class="v" id="vPos">(0.00, 0.00) m</span></div>
+  <div class="row"><span class="k">帧 / 数据龄</span><span class="v" id="vCnt">0 / —</span></div>
+</div>
+
+<label class="follow"><input type="checkbox" id="follow" checked> 镜头跟随</label>
+<div class="hint">网格 1m × 1m（亮线 5m） · 数据 100ms/帧 · 时间缓冲插值渲染 · 断线或信号丢失 3s 自动重连</div>
+
+<script>
+"use strict";
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+const $ = (id) => document.getElementById(id);
+
+const PX_PER_M = 52;          // 像素/米
+const TRAIL_MAX = 700;        // 轨迹点上限
+const WATCHDOG_MS = 3000;     // 下行看门狗：3s 无数据判信号丢失
+const INTERP_DELAY = 90;      // 渲染延迟（ms）：在最近两帧之间插值，得到平滑且低延迟的运动
+const HISTORY = 24;           // 插值样本缓冲长度
+
+let target = { x: 0, y: 0, heading: 0, speed: 0, battery: 100 };
+let shown  = { x: 0, y: 0, heading: 0 };
+let trail = [];               // [{x,y,speed}]
+let history = [];             // [{t,x,y,heading,speed,battery}]
+let frames = 0, reconnects = 0;
+let lastFrameAt = 0;
+let cam = { x: 0, y: 0 };
+
+const dpr = Math.min(window.devicePixelRatio || 1, 2);
+function resize() {
+  cv.width = dpr * window.innerWidth;
+  cv.height = dpr * window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+// ---------- WebSocket：自动重连 + 下行看门狗 ----------
+let ws = null;
+function setStatus(cls, text) {
+  $("dot").className = "dot" + (cls ? " " + cls : "");
+  $("st").textContent = text;
+}
+function connect() {
+  ws = new WebSocket("ws://" + location.host + "/");
+  ws.onopen = () => { lastFrameAt = Date.now(); setStatus("on", "已连接"); };
+  ws.onmessage = (ev) => {
+    lastFrameAt = Date.now();
+    let m;
+    try { m = JSON.parse(ev.data); } catch (e) { return; }
+    if (m.type !== "state") return;
+    target = m;
+    frames++;
+    history.push({ t: performance.now(), x: m.x, y: m.y, heading: m.heading,
+                   speed: m.speed, battery: m.battery });
+    if (history.length > HISTORY) history.shift();
+  };
+  ws.onclose = () => {
+    setStatus("", "已断开，2s 后重连…");
+    reconnects++;
+    setTimeout(connect, 2000);
+  };
+  ws.onerror = () => { try { ws.close(); } catch (e) {} };
+}
+connect();
+
+// 看门狗：socket 未关但 3s 无数据（服务端假死/半开连接）→ 强制重连
+setInterval(() => {
+  if (ws && ws.readyState === 1 && lastFrameAt > 0) {
+    const age = Date.now() - lastFrameAt;
+    if (age > WATCHDOG_MS) {
+      setStatus("warn", `信号丢失 ${(age / 1000).toFixed(0)}s，强制重连…`);
+      try { ws.close(); } catch (e) {}
+    }
+  }
+}, 1000);
+
+// ---------- 时间缓冲插值：在最近两帧之间按 (now - INTERP_DELAY) 插值 ----------
+function sampleAt(renderT) {
+  const n = history.length;
+  if (n === 0) return null;
+  if (n === 1 || renderT <= history[0].t) return history[0];
+  if (renderT >= history[n - 1].t) return history[n - 1];
+  for (let i = 0; i < n - 1; i++) {
+    const a = history[i], b = history[i + 1];
+    if (renderT >= a.t && renderT <= b.t) {
+      const u = (renderT - a.t) / Math.max(1, b.t - a.t);
+      // 朝向走最短角差，避免 -1°→359° 时绕圈
+      let dh = ((b.heading - a.heading) % 360 + 540) % 360 - 180;
+      const h = a.heading + dh * u;
+      return {
+        x: a.x + (b.x - a.x) * u,
+        y: a.y + (b.y - a.y) * u,
+        heading: ((h % 360) + 360) % 360,
+        speed: a.speed + (b.speed - a.speed) * u,
+        battery: a.battery + (b.battery - a.battery) * u,
+      };
+    }
+  }
+  return history[n - 1];
+}
+
+// ---------- 渲染 ----------
+function w2s(wx, wy, W, H) {
+  return [W / 2 + (wx - cam.x) * PX_PER_M, H / 2 - (wy - cam.y) * PX_PER_M];
+}
+
+function drawGrid(W, H) {
+  const x0 = Math.floor(cam.x - W / 2 / PX_PER_M) - 1;
+  const x1 = Math.ceil(cam.x + W / 2 / PX_PER_M) + 1;
+  const y0 = Math.floor(cam.y - H / 2 / PX_PER_M) - 1;
+  const y1 = Math.ceil(cam.y + H / 2 / PX_PER_M) + 1;
+  // 次网格 1m
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "#1a2740";
+  ctx.beginPath();
+  for (let gx = x0; gx <= x1; gx++) { const sx = w2s(gx, 0, W, H)[0]; ctx.moveTo(sx, 0); ctx.lineTo(sx, H); }
+  for (let gy = y0; gy <= y1; gy++) { const sy = w2s(0, gy, W, H)[1]; ctx.moveTo(0, sy); ctx.lineTo(W, sy); }
+  ctx.stroke();
+  // 主网格 5m
+  ctx.lineWidth = 1.4;
+  ctx.strokeStyle = "#29406b";
+  ctx.beginPath();
+  for (let gx = x0 - ((x0 % 5) + 5) % 5; gx <= x1; gx += 5) { const sx = w2s(gx, 0, W, H)[0]; ctx.moveTo(sx, 0); ctx.lineTo(sx, H); }
+  for (let gy = y0 - ((y0 % 5) + 5) % 5; gy <= y1; gy += 5) { const sy = w2s(0, gy, W, H)[1]; ctx.moveTo(0, sy); ctx.lineTo(W, sy); }
+  ctx.stroke();
+  // 原点
+  const [ox, oy] = w2s(0, 0, W, H);
+  ctx.strokeStyle = "#4a5f85"; ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(ox - 12, oy); ctx.lineTo(ox + 12, oy);
+  ctx.moveTo(ox, oy - 12); ctx.lineTo(ox, oy + 12);
+  ctx.stroke();
+  // 比例尺（1m）
+  const bx = W - 40, by = H - 26;
+  ctx.strokeStyle = "#8fa3bf"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(bx - PX_PER_M, by); ctx.lineTo(bx, by);
+  ctx.moveTo(bx - PX_PER_M, by - 5); ctx.lineTo(bx - PX_PER_M, by + 5);
+  ctx.moveTo(bx, by - 5); ctx.lineTo(bx, by + 5);
+  ctx.stroke();
+  ctx.fillStyle = "#8fa3bf"; ctx.font = "12px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("1 m", bx - PX_PER_M / 2, by - 8);
+}
+
+// 速度 → 颜色：慢=青色，快=暖色
+function speedColor(sp, alpha) {
+  const h = 200 - Math.min(1, Math.abs(sp)) * 155;   // 200(青) → 45(琥珀)
+  return `hsla(${h.toFixed(0)}, 85%, 62%, ${alpha})`;
+}
+
+function drawTrail(W, H) {
+  const n = trail.length;
+  if (n < 2) return;
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  // 底层光晕：整条轨迹一次性宽描边，深色背景上把痕迹衬出来
+  ctx.strokeStyle = "rgba(56,189,248,0.07)";
+  ctx.lineWidth = 11;
+  ctx.beginPath();
+  let [hx, hy] = w2s(trail[0].x, trail[0].y, W, H);
+  ctx.moveTo(hx, hy);
+  for (let i = 1; i < n; i++) { const [px, py] = w2s(trail[i].x, trail[i].y, W, H); ctx.lineTo(px, py); }
+  ctx.stroke();
+  // 主轨迹：分段着色（按新近度调透明度/线宽，按速度调色）
+  const CH = 18;
+  for (let s = 0; s < n - 1; s += CH) {
+    const e = Math.min(s + CH, n - 1);
+    const mid = (s + e) >> 1;
+    const rec = mid / (n - 1);                         // 0=旧 1=新
+    ctx.strokeStyle = speedColor(trail[mid].speed || 0, 0.85 * rec + 0.18);
+    ctx.lineWidth = 1.6 + 3.6 * rec;
+    ctx.beginPath();
+    let [x0, y0] = w2s(trail[s].x, trail[s].y, W, H);
+    ctx.moveTo(x0, y0);
+    for (let i = s + 1; i <= e; i++) { const [px, py] = w2s(trail[i].x, trail[i].y, W, H); ctx.lineTo(px, py); }
+    ctx.stroke();
+  }
+  // 最新一段高亮辉光
+  ctx.shadowColor = "rgba(56,189,248,.9)"; ctx.shadowBlur = 12;
+  const a = trail[n - 2], b = trail[n - 1];
+  const [x0, y0] = w2s(a.x, a.y, W, H);
+  const [x1, y1] = w2s(b.x, b.y, W, H);
+  ctx.strokeStyle = "rgba(125,211,252,1)"; ctx.lineWidth = 4.5;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+function drawCar(W, H, tSec) {
+  const [sx, sy] = w2s(shown.x, shown.y, W, H);
+  const L = 26, Wd = 16;
+  const moving = Math.abs(shown.speed || target.speed) > 0.02;
+  // 位置脉冲环：让车在深色场景里一眼可见
+  const ring = 13 + 5 * Math.abs(Math.sin(tSec * 3));
+  ctx.strokeStyle = "rgba(56,189,248,.22)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(sx, sy, ring, 0, Math.PI * 2); ctx.stroke();
+  ctx.save();
+  ctx.translate(sx, sy);
+  ctx.rotate(shown.heading * Math.PI / 180);
+  // 车灯锥形光束（移动时更亮）
+  const beam = ctx.createLinearGradient(0, 0, 0, -95);
+  const a = moving ? 0.22 + 0.08 * Math.sin(tSec * 6) : 0.10;
+  beam.addColorStop(0, `rgba(254,243,199,${a})`);
+  beam.addColorStop(1, "rgba(254,243,199,0)");
+  ctx.fillStyle = beam;
+  ctx.beginPath();
+  ctx.moveTo(-9, -L / 2 + 2);
+  ctx.lineTo(9, -L / 2 + 2);
+  ctx.lineTo(30, -95);
+  ctx.lineTo(-30, -95);
+  ctx.closePath();
+  ctx.fill();
+  // 车轮
+  ctx.fillStyle = "#1f2937";
+  ctx.fillRect(-Wd / 2 - 3, -L / 2 + 3, 4, 7);
+  ctx.fillRect(Wd / 2 - 1, -L / 2 + 3, 4, 7);
+  ctx.fillRect(-Wd / 2 - 3, L / 2 - 10, 4, 7);
+  ctx.fillRect(Wd / 2 - 1, L / 2 - 10, 4, 7);
+  // 车身
+  ctx.shadowColor = "rgba(245,158,11,.55)";
+  ctx.shadowBlur = moving ? 16 : 8;
+  ctx.fillStyle = "#f59e0b";
+  ctx.strokeStyle = "#b45309"; ctx.lineWidth = 1.6;
+  roundRect(-Wd / 2, -L / 2, Wd, L, 4);
+  ctx.fill(); ctx.stroke();
+  ctx.shadowBlur = 0;
+  // 挡风玻璃与车灯
+  ctx.fillStyle = "#7c2d12";
+  roundRect(-Wd / 2 + 3, -L / 2 + 7, Wd - 6, 5, 2);
+  ctx.fill();
+  ctx.fillStyle = "#fef9c3";
+  ctx.fillRect(-Wd / 2 + 2, -L / 2 + 1, 4, 2.5);
+  ctx.fillRect(Wd / 2 - 6, -L / 2 + 1, 4, 2.5);
+  ctx.restore();
+}
+
+// 起点标记
+function drawStartMark(W, H) {
+  if (trail.length < 2) return;
+  const [x, y] = w2s(trail[0].x, trail[0].y, W, H);
+  ctx.strokeStyle = "#8fa3bf"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.stroke();
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+// ---------- 主循环 ----------
+let lastT = performance.now();
+let domAcc = 0;
+function loop(nowMs) {
+  const dt = Math.min((nowMs - lastT) / 1000, 0.1);
+  lastT = nowMs;
+
+  const s = sampleAt(nowMs - INTERP_DELAY);
+  if (s) { shown.x = s.x; shown.y = s.y; shown.heading = s.heading; shown.speed = s.speed; }
+  else { shown.x = target.x; shown.y = target.y; shown.heading = target.heading; shown.speed = target.speed; }
+
+  // 轨迹：按插值后的实际位置入栈（阈值去重，得到平滑连续痕迹）
+  const last = trail[trail.length - 1];
+  if (!last || Math.hypot(shown.x - last.x, shown.y - last.y) > 0.01) {
+    trail.push({ x: shown.x, y: shown.y, speed: shown.speed || 0 });
+    if (trail.length > TRAIL_MAX) trail.shift();
+  }
+
+  const follow = $("follow").checked;
+  if (follow) { cam.x = shown.x; cam.y = shown.y; }
+
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+  drawGrid(W, H);
+  drawTrail(W, H);
+  drawStartMark(W, H);
+  drawCar(W, H, nowMs / 1000);
+
+  // DOM 面板 4Hz 刷新，降低重排开销
+  domAcc += dt;
+  if (domAcc >= 0.25) {
+    domAcc = 0;
+    const sp = shown.speed || 0;
+    $("vSpeed").textContent = sp.toFixed(2) + " m/s";
+    $("barSpeed").firstElementChild.style.width = Math.min(100, Math.abs(sp) * 100) + "%";
+    const batt = shown.battery || target.battery;
+    $("vBatt").textContent = batt.toFixed(1) + " %";
+    const barB = $("barBatt");
+    barB.firstElementChild.style.width = Math.max(0, batt) + "%";
+    barB.className = "bar" + (batt < 20 ? " low" : "");
+    $("vHead").textContent = ((shown.heading % 360 + 360) % 360).toFixed(1) + " °";
+    $("vPos").textContent = "(" + shown.x.toFixed(2) + ", " + shown.y.toFixed(2) + ") m";
+    const age = lastFrameAt > 0 ? ((Date.now() - lastFrameAt) / 1000).toFixed(1) + "s" : "—";
+    $("vCnt").textContent = frames + " / " + age;
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+{
+  "services": [
+    {
+      "service_id": "Car",
+      "service_type": "Car",
+      "description": "全场景智能寻检车：运动控制与状态上报",
+      "properties": [
+        {
+          "property_name": "speed",
+          "description": "当前线速度 m/s（正值前进）",
+          "data_type": {
+            "type": "decimal",
+            "specs": { "min": "-1", "max": "1", "step": "0.001", "unit": "m/s", "scale": "3" }
+          },
+          "required": false,
+          "method": "R"
+        },
+        {
+          "property_name": "battery",
+          "description": "电量百分比",
+          "data_type": {
+            "type": "decimal",
+            "specs": { "min": "0", "max": "100", "step": "0.1", "unit": "%", "scale": "1" }
+          },
+          "required": false,
+          "method": "R"
+        },
+        {
+          "property_name": "heading",
+          "description": "朝向角（0=北，顺时针增大）",
+          "data_type": {
+            "type": "decimal",
+            "specs": { "min": "0", "max": "360", "step": "0.1", "unit": "\u00b0", "scale": "1" }
+          },
+          "required": false,
+          "method": "R"
+        },
+        {
+          "property_name": "x",
+          "description": "东向位移（米）",
+          "data_type": {
+            "type": "decimal",
+            "specs": { "min": "-1000", "max": "1000", "step": "0.001", "unit": "m", "scale": "3" }
+          },
+          "required": false,
+          "method": "R"
+        },
+        {
+          "property_name": "y",
+          "description": "北向位移（米）",
+          "data_type": {
+            "type": "decimal",
+            "specs": { "min": "-1000", "max": "1000", "step": "0.001", "unit": "m", "scale": "3" }
+          },
+          "required": false,
+          "method": "R"
+        }
+      ],
+      "commands": [
+        {
+          "command_name": "move",
+          "description": "运动控制：双轴归一化摇杆值",
+          "paras": [
+            {
+              "para_name": "lx",
+              "description": "横轴：左负右正，控制转向",
+              "data_type": {
+                "type": "decimal",
+                "specs": { "min": "-1", "max": "1", "step": "0.01", "unit": "", "scale": "2" }
+              },
+              "required": true
+            },
+            {
+              "para_name": "ly",
+              "description": "纵轴：下负上正，控制前后",
+              "data_type": {
+                "type": "decimal",
+                "specs": { "min": "-1", "max": "1", "step": "0.01", "unit": "", "scale": "2" }
+              },
+              "required": true
+            }
+          ]
+        },
+        {
+          "command_name": "stop",
+          "description": "急停：速度与转向立即归零",
+          "paras": []
+        },
+        {
+          "command_name": "ping",
+          "description": "连通性测试",
+          "paras": []
+        }
+      ]
+    }
+  ]
+}

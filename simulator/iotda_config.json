@@ -1,0 +1,8 @@
+{
+  "platform": "real",
+  "host": "1dc089e08c.st1.iotda-device.cn-north-4.myhuaweicloud.com",
+  "port": 8883,
+  "tls": true,
+  "device_id": "6ae6e66a7f2e6c302fa8ffd1_car_001",
+  "secret": "2cbcafa13499a5a94026c8c65b82a782"
+}

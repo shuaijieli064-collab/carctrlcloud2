@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>全场景智能寻检车 APP — 接口文档</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs" type="module"></script>
+<style>
+  :root {
+    --bg: #f6f7fa; --card: #ffffff; --ink: #1f2937; --sub: #6b7280;
+    --line: #e5e7eb; --accent: #2563eb; --accent-bg: #eff6ff;
+    --green: #059669; --green-bg: #ecfdf5; --amber: #b45309; --amber-bg: #fffbeb;
+    --red: #b91c1c; --red-bg: #fef2f2;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: var(--bg); color: var(--ink);
+         font-family: "Segoe UI", "Microsoft YaHei", sans-serif; font-size: 15px; line-height: 1.65; }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 24px; border-bottom: 3px solid var(--accent); padding-bottom: 10px; }
+  h2 { font-size: 19px; margin-top: 40px; background: var(--accent-bg); padding: 10px 14px;
+       border-left: 4px solid var(--accent); border-radius: 4px; }
+  h3 { font-size: 16px; margin: 24px 0 8px; }
+  .meta { color: var(--sub); font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; background: var(--card); }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #f3f4f6; font-weight: 600; white-space: nowrap; }
+  code, pre { font-family: Consolas, "Courier New", monospace; font-size: 13px; }
+  code { background: #eef2f7; padding: 1px 5px; border-radius: 3px; }
+  pre { background: #1e293b; color: #e2e8f0; padding: 12px 14px; border-radius: 6px;
+        overflow-x: auto; line-height: 1.5; }
+  pre code { background: none; padding: 0; color: inherit; }
+  .tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 10px; margin-right: 6px; }
+  .tag-req  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+  .tag-res  { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent); }
+  .tag-warn { background: var(--red-bg); color: var(--red); border: 1px solid var(--red); }
+  .note { background: var(--amber-bg); border-left: 4px solid var(--amber); padding: 10px 14px;
+          border-radius: 4px; margin: 12px 0; font-size: 14px; }
+  .toc { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px 20px; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>全场景智能寻检车 APP — 接口文档</h1>
+<p class="meta">项目：carctrlcloud2（HarmonyOS NEXT / OpenHarmony，API 22，Stage 模型） · 更新：2026-11-14 ·
+状态：全部接口均以当前代码实现为准，已端到端实测通过（TCP / 本地 MQTT / 华为云 HTTPS）</p>
+
+<div class="toc">
+<b>目录</b>
+<ol>
+  <li><a href="#ch-a">通道A：TCP 直连控制接口（PC:8888，DEBUG 保留）</a></li>
+  <li><a href="#ch-b">通道B：MQTT 平台接口 — 本地模拟 broker（PC:1883，IoTDA 风格）</a></li>
+  <li><a href="#ch-c">通道C：MQTT TLS 接口 — 华为云真平台车端（:8883）</a></li>
+  <li><a href="#ch-d">通道D：应用侧 HTTPS 接口 — APP 直连华为云（:443）</a></li>
+  <li><a href="#ch-e">通道E：俯视图 WebSocket 接口（:8889 / :8899，只看不控）</a></li>
+  <li><a href="#ch-err">附录1：错误码实录</a> · <a href="#ch-seq">附录2：云端链路时序图</a></li>
+</ol>
+</div>
+
+<h2 id="ch-a">通道A：TCP 直连控制接口（PC:8888）</h2>
+<p class="meta">提供方：<code>simulator/car_server.py</code>（--port 可改） · 调用方：APP <code>TcpClient.ets</code> ·
+状态：隐藏 DEBUG 模式（<code>CarConfig.ENABLE_TCP_DEBUG</code>），帧格式与云端模式共用 <code>CommandProtocol</code> 编解码。</p>
+<table>
+<tr><th>项目</th><th>约定</th></tr>
+<tr><td>传输</td><td>TCP 长连接，<b>JSON 文本帧 + <code>\n</code> 分帧</b>（UTF-8）</td></tr>
+<tr><td>寻址</td><td>模拟器 <code>10.0.2.2:8888</code>；真机填电脑局域网 IP（如 <code>10.234.215.153:8888</code>）</td></tr>
+<tr><td>容错</td><td>非法帧解析返回 <code>error</code> 帧，连接不中断（<code>decode → null</code> 兜底）</td></tr>
+</table>
+
+<h3>上行（APP → 车）</h3>
+<table>
+<tr><th>type</th><th>帧示例</th><th>说明</th></tr>
+<tr><td><span class="tag tag-req">move</span></td><td><code>{"type":"move","seq":12,"lx":0.50,"ly":-1.00,"ts":1760000000000}</code></td>
+<td><code>lx</code> 横轴转向（左负右正），<code>ly</code> 纵轴前后（下负上正），取值 [-1,1]</td></tr>
+<tr><td><span class="tag tag-req">stop</span></td><td><code>{"type":"stop","seq":13}</code></td><td>急停，速度归零</td></tr>
+<tr><td><span class="tag tag-req">ping</span></td><td><code>{"type":"ping","seq":14}</code></td><td>连通性探活</td></tr>
+</table>
+
+<h3>下行（车 → APP）</h3>
+<table>
+<tr><th>type</th><th>帧示例</th><th>说明</th></tr>
+<tr><td><span class="tag tag-res">ack</span></td><td><code>{"type":"ack","seq":12,"ok":true}</code></td><td>命令受理回执（seq 对应上行）</td></tr>
+<tr><td><span class="tag tag-res">pong</span></td><td><code>{"type":"pong","seq":14}</code></td><td>ping 应答</td></tr>
+<tr><td><span class="tag tag-res">state</span></td><td><code>{"type":"state","speed":0.60,"battery":87,"heading":90,"x":1.2,"y":3.4}</code></td>
+<td>周期状态流（100ms）：速度 m/s、电量 %、朝向 °、坐标 m</td></tr>
+<tr><td><span class="tag tag-warn">error</span></td><td><code>{"type":"error","msg":"..."}</code></td><td>非法/缺字段帧的错误响应</td></tr>
+</table>
+
+<h2 id="ch-b">通道B：MQTT 平台接口 — 本地模拟 broker（PC:1883，IoTDA 风格）</h2>
+<p class="meta">提供方：<code>simulator/mqtt_broker.py</code>（自研最小 MQTT broker，另挂俯视图 WS :8899） ·
+调用方：车端 <code>car_mqtt_device.py</code>（设备身份）、APP <code>MqttClient.ets + IotBridge.ets</code>（应用身份）·
+鉴权协议实现：<code>mqtt_protocol.py</code>。</p>
+<table>
+<tr><th>项目</th><th>约定</th></tr>
+<tr><td>设备/应用注册表</td><td><code>DEVICE_REGISTRY</code>（默认 <code>car_001</code>）、<code>APP_REGISTRY</code>（默认 <code>app_controller</code>），各自独立密钥</td></tr>
+<tr><td>clientId</td><td><code>{id}_{Unix秒}</code></td></tr>
+<tr><td>username</td><td><code>{id}</code></td></tr>
+<tr><td>password</td><td><code>Base64( HMAC-SHA256( key=secret, msg="HMAC-SHA256 {id} {ts}" ) )</code>（教学模板，注意与真平台模板不同）</td></tr>
+<tr><td>拒绝码</td><td>CONNACK <code>code=4</code> = 用户名或密码错误（密钥不匹配 / 身份不在注册表）</td></tr>
+</table>
+
+<h3>Topic 表</h3>
+<table>
+<tr><th>方向</th><th>Topic 模板</th><th>说明</th></tr>
+<tr><td>设备订阅（收命令）</td><td><code>$oc/devices/{device_id}/sys/commands/#</code></td><td><code>#</code> 通配 request_id 与 command_name 两段</td></tr>
+<tr><td>应用发布（下命令）</td><td><code>$oc/devices/{device_id}/sys/commands/request_id={rid}/command_name={name}</code></td>
+<td><code>rid</code> 唯一（时间戳+随机数）；<code>name</code> 大小写不敏感</td></tr>
+<tr><td>设备发布（属性上报）</td><td><code>$oc/devices/{device_id}/sys/properties/report</code></td><td>周期上报</td></tr>
+<tr><td>设备发布（命令响应）</td><td><code>$oc/devices/{device_id}/sys/commands/response/request_id={rid}</code></td><td>应用侧据此确认执行结果</td></tr>
+</table>
+
+<h3>命令 payload（body 均为 JSON 对象）</h3>
+<pre><code>// move —— 发布到 command_pub_topic
+{"service_id":"Car","command_name":"move","paras":{"lx":0.50,"ly":-1.00}}
+// stop / ping
+{"service_id":"Car","command_name":"stop","paras":{}}
+{"service_id":"Car","command_name":"ping","paras":{}}
+
+// 属性上报
+{"services":[{"service_id":"Car","properties":{"speed":0.6,"battery":87,"heading":90,"x":1.2,"y":3.4}}]}
+
+// 命令响应（车端 → rid 对应 topic）
+{"result_code":0}</code></pre>
+<table>
+<tr><th>命令</th><th>参数</th><th>校验</th></tr>
+<tr><td>move</td><td><code>lx</code>, <code>ly</code>：decimal，[-1,1]，必填</td><td>缺字段 → 拒绝执行（用例8验证）</td></tr>
+<tr><td>stop</td><td>无</td><td>—</td></tr>
+<tr><td>ping</td><td>无</td><td>—</td></tr>
+</table>
+
+<h2 id="ch-c">通道C：MQTT TLS 接口 — 华为云真平台车端（:8883）</h2>
+<p class="meta">服务方：华为云 IoTDA 标准版实例（<code>1dc089e08c.st1.iotda-device.cn-north-4.myhuaweicloud.com:8883</code>，TLS）·
+调用方：车端 <code>car_mqtt_device.py --platform real</code>（配置自动加载自 <code>iotda_config.json</code>）·
+topic 与命令结构同通道B，鉴权模板不同（官方规范）。</p>
+<table>
+<tr><th>项目</th><th>约定</th></tr>
+<tr><td>clientId</td><td><code>{deviceId}_0_{sig}_{ts}</code>，<code>ts</code>=UTC <code>YYYYMMDDHH</code>；<code>sig</code>=0 不校验时间戳 / 1 校验（±10min 窗）</td></tr>
+<tr><td>username</td><td><code>{deviceId}</code>（形如 <code>{产品ID}_car_001</code>）</td></tr>
+<tr><td>password</td><td><code>HMAC-SHA256( key=ts字符串, msg=设备secret )</code> 的 <b>hex 小写</b>（非 Base64）</td></tr>
+<tr><td>心跳</td><td>自研客户端自动 <code>PINGREQ</code>（keepalive/2 间隔）</td></tr>
+<tr><td>互斥</td><td>同一 deviceId 只允许一条连接：重复上线会互踢（排障高频坑）</td></tr>
+<tr><td>会话空窗</td><td>设备重连瞬间平台可能仍把命令路由给旧死会话 → <code>IOTDA.014111</code> 超时，重发即可</td></tr>
+</table>
+
+<h2 id="ch-d">通道D：应用侧 HTTPS 接口 — APP 直连华为云（:443）</h2>
+<p class="meta">服务方：华为云 IoTDA 应用接入端点（<code>1dc089e08c.st1.iotda-app.cn-north-4.myhuaweicloud.com:443</code>）·
+调用方：APP <code>HuaweiCloudClient.ets</code> · 鉴权：IAM 子用户 AK/SK + <b>V11-HMAC-SHA256</b> 请求签名（每请求独立签名，无 token 过期问题）。</p>
+
+<h3>公共：签名规则（摘要）</h3>
+<pre><code>Authorization: V11-HMAC-SHA256 Credential={AK}/{YYYYMMDD}/{region}/iotdm,
+               SignedHeaders=content-type;host;x-project-id;x-sdk-date, Signature={hex}
+
+派生密钥：  PRK = HMAC-SHA256(key=AK,      msg=SK)
+            DK  = hex( HMAC-SHA256(key=PRK, msg=info + 0x01) )      // info = "{YYYYMMDD}/{region}/iotdm"
+签名字符串： CanonicalRequest = "POST\n{URI尾带斜杠}\n\n{规范Headers}\n{SignedHeaders}\n{SHA256(body)}"
+            StringToSign     = "V11-HMAC-SHA256\n{UTC YYYYMMDDTHHMMSSZ}\n{info}\n{SHA256(CR)}"
+            Signature        = HMAC-SHA256(key=utf8(DK), msg=StringToSign)
+必带头：    X-Project-Id: {项目ID}   X-Sdk-Date: {UTC时间}   Content-Type: application/json</code></pre>
+<div class="note">V11-HMAC-SHA256 是 <b>标准版 IoTDA 实例专属</b>签名变体（HKDF 派生 + 服务名 <code>iotdm</code>），与普通 OpenAPI 的
+SDK-HMAC-SHA256 不同。两种都试过 401 后从官方 SDK 源码逆向核实。</div>
+
+<h3>接口 1：查询设备影子 <span class="tag tag-res">GET</span></h3>
+<pre><code>GET /v5/iot/{project_id}/devices/{device_id}/shadow
+→ 200 {"device_id":"...","shadow":[{"service_id":"Car","reported":{"properties":{...}},"desired":{}}]}
+
+用途：APP 以 1s 轮询（CarConfig.CLOUD_POLL_INTERVAL_MS）替代 MQTT 订阅，获取 speed/battery/heading/x/y。
+特点：读缓存，设备离线也可查询（返回最后一次上报值）。</code></pre>
+
+<h3>接口 2：下发同步设备命令 <span class="tag tag-req">POST</span></h3>
+<pre><code>POST /v5/iot/{project_id}/devices/{device_id}/commands
+body: {"service_id":"Car","command_name":"move","paras":{"lx":0.50,"ly":-1.00}}
+→ 200 {"response":{"result_code":0}}          // 车端实时回执
+→ 失败: {"error_code":"IOTDA.01xxxx","error_msg":"..."}
+
+用途：move / stop / ping 全部走此接口（MQTT 设备唯一可用命令接口）。
+约束：设备必须在线；body 缺 service_id / paras 校验失败 → 400。</code></pre>
+
+<h3>接口 3：下发异步设备命令 <span class="tag tag-warn">POST · 不适用本项目</span></h3>
+<pre><code>POST /v5/iot/{project_id}/devices/{device_id}/async-commands
+body: {"service_id":"Car","command_name":"move","paras":{...},
+       "expire_time":0,"send_strategy":"immediately"}   // send_strategy 必填: immediately | delay
+
+结论：仅支持 LwM2M/CoAP 设备，MQTT 设备调用返回 IOTDA.014114（实测）。
+保留说明：该方法 sendCommandAsync 仍留在代码中作教学对照。</code></pre>
+
+<h2 id="ch-e">通道E：俯视图 WebSocket 接口（:8889 / :8899，只看不控）</h2>
+<p class="meta">提供方：<code>car_server.py</code>（:8889，TCP 直连模式）/ <code>mqtt_broker.py --ws-port</code>（:8899，IoT 模式）·
+调用方：浏览器页面 <code>simulator/webview.html</code>（自研 RFC6455 最小 WS 实现，纯标准库）。</p>
+<table>
+<tr><th>项目</th><th>约定</th></tr>
+<tr><td>连接</td><td><code>ws://{host}:{port}/</code>（HTTP Upgrade 握手）</td></tr>
+<tr><td>下行帧</td><td>100ms 一次 <code>{"type":"state","speed":..,"battery":..,"heading":..,"x":..,"y":..}</code></td>
+</tr>
+<tr><td>过滤</td><td>页面侧 <code>if (m.type !== "state") return;</code> —— <b>帧必须含 <code>type:"state"</code></b>，否则被丢弃</td></tr>
+<tr><td>权限</td><td>只广播状态，不接受控制指令（"只看不控"安全设计）</td></tr>
+</table>
+
+<h2 id="ch-err">附录1：错误码实录（本项目排障沉淀）</h2>
+<table>
+<tr><th>错误</th><th>含义</th><th>处置</th></tr>
+<tr><td><code>CONNACK code=4</code></td><td>MQTT 鉴权失败（用户名/密码不匹配，或身份不在注册表）</td><td>核对 secret、鉴权模板（local 与 real 模板不同）</td></tr>
+<tr><td><code>400 IOTDA.000006</code></td><td>请求体校验失败（如 async-commands 缺 <code>send_strategy</code>）</td><td>按 error_msg 中 Field 名补齐字段</td></tr>
+<tr><td><code>400 IOTDA.014114</code></td><td>该 API 不支持 MQTT 设备</td><td>MQTT 设备改走同步命令接口 <code>/commands</code></td></tr>
+<tr><td><code>403</code>（同步命令）</td><td>设备离线（影子可读缓存，命令要求在线）</td><td>先让车端上线再下发；读 403 另查 IAM 权限</td></tr>
+<tr><td><code>401</code>（HTTPS）</td><td>签名错误（普通 SDK-HMAC-SHA256 ≠ V11）/ AK·SK 不对</td><td>确认用 V11 模板 + X-Project-Id；核对 credentials.csv</td></tr>
+<tr><td><code>IOTDA.014111</code></td><td>命令超时：设备重连空窗期命令路由到旧死会话</td><td>重发命令即可</td></tr>
+<tr><td><code>WinError 10061</code></td><td>目标地址端口无监听（脚本没跑 / 地址错 / 同 deviceId 被踢）</td><td>netstat 查监听 + 日志定位</td></tr>
+</table>
+
+<h2 id="ch-seq">附录2：云端链路时序图（APP 按下方向键 → 车轮转动）</h2>
+<div class="mermaid">
+sequenceDiagram
+    participant U as 用户(摇杆)
+    participant A as APP 鸿蒙端
+    participant C as 华为云 IoTDA
+    participant D as 车端脚本(Python)
+    U->>A: 摇杆位移(x,y)
+    A->>A: 死区0.08→低通0.55→节流200ms→lx,ly
+    A->>C: POST /commands (V11签名, lx/ly)
+    C->>C: 校验AK/SK签名 + 物模型参数
+    C->>D: MQTT $oc/.../commands/request_id=rid/command_name=move
+    D->>D: parse_command→car_model.update(lx,ly)
+    D-->>C: 命令响应 {result_code:0}
+    C-->>A: 200 {"response":{"result_code":0}}
+    loop 每1s属性上报 / 每秒影子轮询
+        D->>C: properties/report (speed,battery,heading,x,y)
+        A->>C: GET /shadow
+        C-->>A: 影子快照(缓存)
+        A->>U: 状态卡/俯视图刷新
+    end
+</div>
+<p class="meta">本地模拟链路（通道B）时序相同，仅把"华为云 IoTDA"换成"mqtt_broker.py 1883"，鉴权换成教学模板。</p>
+
+<p class="meta" style="margin-top:40px">— 完 —</p>
+</div>
+</body>
+</html>

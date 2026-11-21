@@ -1,0 +1,10 @@
+{
+  "endpoint": "1dc089e08c.st1.iotda-app.cn-north-4.myhuaweicloud.com",
+  "region": "cn-north-4",
+  "project_id": "01a195e54c1572cb94866775d0be8c18",
+  "device_id": "6ae6e66a7f2e6c302fa8ffd1_car_001",
+  "ak": "HPUAMCSYB9GSMJ1IAGBA",
+  "sk": "I2N3KLlj2FILdNR2bqoLZ0bQgmRl66Qph5odCfex",
+  "poll_ms": 500,
+  "ws_port": 8900
+}

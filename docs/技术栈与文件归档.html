@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>全场景智能寻检车 — 技术栈描述与文件归档</title>
+<style>
+  :root {
+    --bg: #f6f7fa; --card: #ffffff; --ink: #1f2937; --sub: #6b7280;
+    --line: #e5e7eb; --accent: #2563eb; --accent-bg: #eff6ff;
+    --green-bg: #ecfdf5; --green: #059669;
+    --amber-bg: #fffbeb; --amber: #b45309;
+    --gray-bg: #f3f4f6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: var(--bg); color: var(--ink);
+         font-family: "Segoe UI", "Microsoft YaHei", sans-serif; font-size: 15px; line-height: 1.65; }
+  .wrap { max-width: 1020px; margin: 0 auto; }
+  h1 { font-size: 24px; border-bottom: 3px solid var(--accent); padding-bottom: 10px; }
+  h2 { font-size: 19px; margin-top: 40px; background: var(--accent-bg); padding: 10px 14px;
+       border-left: 4px solid var(--accent); border-radius: 4px; }
+  h3 { font-size: 16px; margin: 26px 0 8px; }
+  .meta { color: var(--sub); font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; background: var(--card); font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: #f3f4f6; font-weight: 600; white-space: nowrap; }
+  code { background: #eef2f7; padding: 1px 5px; border-radius: 3px; font-size: 13px;
+         font-family: Consolas, "Courier New", monospace; }
+  .tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 10px; white-space: nowrap; }
+  .t-main { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+  .t-proc { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber); }
+  .t-doc  { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent); }
+  .tree { background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+          padding: 16px 20px; font-family: Consolas, monospace; font-size: 13.5px;
+          line-height: 1.75; overflow-x: auto; white-space: pre; }
+  .tree .f-main { color: var(--green); font-weight: 600; }
+  .tree .f-proc { color: var(--amber); }
+  .tree .f-dir  { color: var(--accent); font-weight: 600; }
+  .legend { font-size: 13px; margin: 8px 0; }
+  .note { background: var(--amber-bg); border-left: 4px solid var(--amber); padding: 10px 14px;
+          border-radius: 4px; margin: 12px 0; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>技术栈描述与文件归档</h1>
+<p class="meta">项目：carctrlcloud2（全场景智能寻检车 APP） · 更新：2026-11-14 ·
+图例：<span class="tag t-main">主文件</span> 核心业务 / <span class="tag t-proc">过程·测试文件</span> 联调与验证工具 / <span class="tag t-doc">文档·配置</span></p>
+
+<h2>一、技术栈总览</h2>
+<table>
+<tr><th style="width:130px">层</th><th>技术</th><th>在本项目中的作用</th></tr>
+<tr><td><b>APP 端语言/框架</b></td><td>ArkTS + ArkUI 声明式 UI，Stage 模型，API 22</td>
+<td>页面组件（Index/ControlPage）、状态驱动渲染（@State）、自定义 Joystick 组件</td></tr>
+<tr><td><b>系统能力</b></td><td>@kit.NetworkKit</td>
+<td><code>socket.TCPSocket</code>（直连模式）、<code>socket.TLSSocket</code>（secureOptions+CA）、<code>http</code>（HTTPS 轮询与命令）</td></tr>
+<tr><td><b>自研加密库</b></td><td>SHA-256 / HMAC-SHA256 / Base64 / UTF-8 编解码（零第三方依赖）</td>
+<td>MQTT 密码鉴权（两种模板）、HTTPS V11-HMAC-SHA256 请求签名（HKDF 派生）</td></tr>
+<tr><td><b>自研协议栈</b></td><td>MQTT 3.1.1 最小客户端/服务端、RFC6455 WebSocket 最小实现（Python）</td>
+<td>broker 与设备端不引入 paho/websocket 库，教学可读 + 抓包可控；ArkTS 侧 MqttClient 自研报文编解码</td></tr>
+<tr><td><b>PC 端语言</b></td><td>Python 3.12，仅标准库（socket/ssl/threading/asyncio/ssl 上下文）</td>
+<td>虚拟小车运动学、TCP/WS/MQTT 三类服务、设备接入脚本、集成测试</td></tr>
+<tr><td><b>云平台</b></td><td>华为云 IoTDA 标准版（cn-north-4）+ IAM 子用户</td>
+<td>设备接入（MQTTS 8883）、设备影子、命令下发、物模型校验；应用侧开放 API（HTTPS 443）</td></tr>
+<tr><td><b>可视化</b></td><td>ArkUI Canvas（APP 俯视图）+ 浏览器 Canvas（webview.html）</td>
+<td>轨迹/状态实时渲染，数据源为 100ms state 帧或 1s 影子轮询</td></tr>
+</table>
+
+<div class="note"><b>关键设计约定：</b>① 零第三方依赖——鸿蒙侧与 Python 侧全部自研；② 运动学单一真源
+<code>car_model.py</code>，所有端的状态渲染都来自它；③ 双拓扑并存——本地模拟（教学/抓包）与真平台（已端到端实测）可一键切换。</div>
+
+<h2>二、APP 端文件归档（entry/src/main/ets/）</h2>
+<table>
+<tr><th style="width:250px">文件</th><th style="width:70px">类别</th><th>作用</th></tr>
+<tr><td><code>pages/Index.ets</code></td><td><span class="tag t-main">主文件</span></td>
+<td>首页：模式选择（云端/TCP-DEBUG/华为云）+ 连接入口，携带参数跳转 ControlPage</td></tr>
+<tr><td><code>pages/ControlPage.ets</code></td><td><span class="tag t-main">主文件</span></td>
+<td>操控主页面：摇杆（死区0.08/低通0.55/节流200ms）、状态卡、俯视图 Canvas、回执日志区；三模式命令分发</td></tr>
+<tr><td><code>net/TcpClient.ets</code></td><td><span class="tag t-main">主文件</span></td>
+<td>TCP 直连客户端（DEBUG）：连接 8888、\n 分帧收发、ping 保活</td></tr>
+<tr><td><code>net/MqttClient.ets</code></td><td><span class="tag t-main">主文件</span></td>
+<td>自研 MQTT 客户端：CONNECT/CONNACK、SUBACK、PUBLISH、心跳；<code>connectTls()</code> 支持真平台 8883</td></tr>
+<tr><td><code>net/IotBridge.ets</code></td><td><span class="tag t-main">主文件</span></td>
+<td>IoTDA 风格 topic 模板、命令 payload 编码（move/stop/ping）、属性解析；导出加密原语供签名复用</td></tr>
+<tr><td><code>net/HuaweiCloudClient.ets</code></td><td><span class="tag t-main">主文件</span></td>
+<td>华为云直连（模块⑤）：V11-HMAC-SHA256 签名、影子 1s 轮询、同步命令下发、凭证校验</td></tr>
+<tr><td><code>model/CommandProtocol.ets</code></td><td><span class="tag t-main">主文件</span></td>
+<td>指令协议单一真源：帧定义、编解码、seq 自增、非法帧容错（返回 null）</td></tr>
+<tr><td><code>common/CarConfig.ets</code></td><td><span class="tag t-main">主文件</span></td>
+<td>全局配置：寻址（模拟器/真机）、端口、CLOUD_*（endpoint/region/deviceId/projectId/轮询节律）</td></tr>
+<tr><td><code>view/Joystick.ets</code></td><td><span class="tag t-main">主文件</span></td>
+<td>自定义摇杆组件：触点跟随、位移归一化回调</td></tr>
+<tr><td><code>entryability/EntryAbility.ets</code></td><td><span class="tag t-main">主文件</span></td>
+<td>Stage 模型入口 Ability，加载 Index</td></tr>
+<tr><td><code>entrybackupability/EntryBackupAbility.ets</code></td><td><span class="tag t-proc">过程</span></td>
+<td>模板自带的备份能力，未参与业务</td></tr>
+</table>
+
+<h2>三、模拟器/车端文件归档（simulator/）</h2>
+<table>
+<tr><th style="width:250px">文件</th><th style="width:70px">类别</th><th>作用</th></tr>
+<tr><td><code>car_model.py</code></td><td><span class="tag t-main">主文件</span></td>
+<td>虚拟小车运动学单一真源：速度/转向/电量/位置积分，转向死区 0.05</td></tr>
+<tr><td><code>car_server.py</code></td><td><span class="tag t-main">主文件</span></td>
+<td>TCP 直连服务（模块③）：:8888 控制帧 + :8889 俯视图 WS 广播（自研 RFC6455）</td></tr>
+<tr><td><code>mqtt_broker.py</code></td><td><span class="tag t-main">主文件</span></td>
+<td>本地 MQTT broker（模块④）：:1883 CONNECT 鉴权（双注册表）、通配订阅路由 + :8899 俯视图 WS</td></tr>
+<tr><td><code>mqtt_protocol.py</code></td><td><span class="tag t-main">主文件</span></td>
+<td>IoT 协议层：鉴权模板（local/real 两套）、topic 构造、命令解析（容错）、注册表常量</td></tr>
+<tr><td><code>mqtt_client.py</code></td><td><span class="tag t-main">主文件</span></td>
+<td>自研 MQTT 客户端：明文/TLS（ssl.wrap_socket）、自动 PINGREQ 心跳、中文排障提示</td></tr>
+<tr><td><code>car_mqtt_device.py</code></td><td><span class="tag t-main">主文件</span></td>
+<td>车端设备脚本：local 模式（本地 broker）/ real 模式（真平台 TLS，官方鉴权）；配置自动加载；命令执行+属性上报</td></tr>
+<tr><td><code>app_mqtt_client.py</code></td><td><span class="tag t-main">主文件</span></td>
+<td>APP 替身集成测试（9 用例）：鉴权/属性/命令/容错/互踢，端到端验收工具</td></tr>
+<tr><td><code>run_iot.py</code></td><td><span class="tag t-proc">过程</span></td>
+<td>一键启动器：清理端口 → broker(1883/8899) → 车端 → 打开浏览器俯视图</td></tr>
+<tr><td><code>test_client.py</code></td><td><span class="tag t-proc">过程</span></td>
+<td>TCP 直连模式的早期手动测试客户端（模块③联调遗留）</td></tr>
+<tr><td><code>webview.html</code></td><td><span class="tag t-main">主文件</span></td>
+<td>浏览器俯视图：Canvas 轨迹渲染，WebSocket 只收 state 帧（只看不控）</td></tr>
+<tr><td><code>iotda_config.json</code></td><td><span class="tag t-doc">文档·配置</span></td>
+<td>车端 real 模式凭证（host/port/tls/device_id/secret）——<b>敏感文件，勿提交仓库</b></td></tr>
+<tr><td><code>iotda_car_model.json</code></td><td><span class="tag t-doc">文档·配置</span></td>
+<td>产品 carCtrl 物模型（可在 IoTDA 控制台导入）：属性 5 项 + 命令 move/stop/ping</td></tr>
+<tr><td><code>logs/car_real.log 等</code></td><td><span class="tag t-proc">过程</span></td>
+<td>运行日志输出</td></tr>
+</table>
+
+<h2>四、工程配置与文档</h2>
+<table>
+<tr><th style="width:250px">文件</th><th style="width:70px">类别</th><th>作用</th></tr>
+<tr><td><code>build-profile.json5</code>、<code>hvigorfile.ts</code>、<code>oh-package.json5</code></td><td><span class="tag t-doc">文档·配置</span></td>
+<td>hvigor 构建体系与依赖声明（本工程无三方依赖）</td></tr>
+<tr><td><code>AppScope/</code>（app.json5、图标）</td><td><span class="tag t-doc">文档·配置</span></td>
+<td>应用级配置：bundleName <code>com.Nox7th.carctrlcloud</code>、版本、图标</td></tr>
+<tr><td><code>docs/接口文档.html</code>、<code>docs/五端网络组织结构图.html</code>、<code>docs/技术栈与文件归档.html</code></td><td><span class="tag t-doc">文档·配置</span></td>
+<td>P1 交付物三件套（本文件为其中之一）</td></tr>
+<tr><td><code>docs/华为云IoTDA接入指南.md</code></td><td><span class="tag t-doc">文档·配置</span></td>
+<td>真平台接入步骤（建产品→导模型→注册设备→跑脚本→验证）</td></tr>
+<tr><td><code>docs_src/</code>（图片/素材）</td><td><span class="tag t-proc">过程</span></td>
+<td>文档配图源素材</td></tr>
+</table>
+
+<h2>五、构建与运行备忘</h2>
+<table>
+<tr><th>事项</th><th>命令/要点</th></tr>
+<tr><td>ArkTS 构建（沙箱）</td><td><code>export DEVECO_SDK_HOME="/d/xl/hm/DevEco Studio/sdk"</code> 后
+<code>node "…/hvigor/bin/hvigorw.js" assembleHap --mode module -p module=entry@default -p product=default</code></td></tr>
+<tr><td>车端 local 模式</td><td><code>python car_mqtt_device.py --platform local --host 127.0.0.1 --port 1883 --device-id car_001 --no-tls</code>
+（iotda_config.json 会带入 real 默认值，必须显式覆盖）</td></tr>
+<tr><td>车端 real 模式</td><td><code>python car_mqtt_device.py</code>（配置自动加载，TLS 8883）</td></tr>
+<tr><td>集成测试</td><td><code>python app_mqtt_client.py</code>（先确保 broker 与 local 车端在线；9/9 为通过基线）</td></tr>
+<tr><td>Python 解释器</td><td><code>D:/xl/python.exe</code>（3.12）</td></tr>
+</table>
+</div>
+</body>
+</html>

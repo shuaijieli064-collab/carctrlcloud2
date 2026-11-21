@@ -1,0 +1,3 @@
+# 模拟小车与打桩测试客户端均仅使用 Python 标准库
+# （socket / socketserver / threading / json / argparse）
+# 无需安装第三方依赖。

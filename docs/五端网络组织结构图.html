@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>全场景智能寻检车 — 五端网络组织结构图</title>
+<style>
+  :root {
+    --bg: #f6f7fa; --card: #ffffff; --ink: #1f2937; --sub: #6b7280;
+    --line: #e5e7eb; --accent: #2563eb; --accent-bg: #eff6ff;
+    --green: #059669; --green-bg: #ecfdf5;
+    --orange: #c2410c; --orange-bg: #fff7ed;
+    --purple: #7c3aed; --purple-bg: #f5f3ff;
+    --teal: #0d9488; --teal-bg: #f0fdfa;
+    --rose: #be123c; --rose-bg: #fff1f2;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: var(--bg); color: var(--ink);
+         font-family: "Segoe UI", "Microsoft YaHei", sans-serif; font-size: 15px; line-height: 1.6; }
+  h1 { font-size: 22px; border-bottom: 3px solid var(--accent); padding-bottom: 8px; }
+  .meta { color: var(--sub); font-size: 13px; }
+  .stage { position: relative; background: var(--card); border: 1px solid var(--line);
+           border-radius: 12px; overflow: hidden; }
+  svg { display: block; width: 100%; height: auto; user-select: none; }
+  .node { cursor: pointer; }
+  .node rect { transition: filter .15s; }
+  .node:hover rect { filter: brightness(1.06); }
+  .node.selected rect { stroke-width: 4; }
+  .edge { cursor: pointer; }
+  .edge:hover path.wire { stroke-width: 3.5; }
+  .edge.selected path.wire { stroke-width: 4; stroke-dasharray: none; }
+  /* 信息面板 */
+  #panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+           margin-top: 16px; padding: 18px 22px; min-height: 120px; }
+  #panel h2 { margin: 0 0 8px; font-size: 18px; }
+  #panel .kind { font-size: 12px; padding: 2px 10px; border-radius: 10px; vertical-align: 3px; margin-left: 8px; }
+  #panel table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
+  #panel th, #panel td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+  #panel th { background: #f3f4f6; white-space: nowrap; width: 110px; }
+  code { background: #eef2f7; padding: 1px 5px; border-radius: 3px; font-size: 13px;
+         font-family: Consolas, monospace; }
+  .hint { margin-top: 12px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; margin-right: 14px; font-size: 13px; }
+  .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+</style>
+</head>
+<body>
+<h1>五端网络组织结构图</h1>
+<p class="meta">全场景智能寻检车 APP（carctrlcloud2） · 点击<b>节点</b>查看端职责详情，点击<b>连线</b>查看接口详情 ·
+绿线=状态/数据上行，蓝线=命令下行，橙线=视图数据流</p>
+
+<div class="stage">
+<svg viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arr-blue"   markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#2563eb"/></marker>
+    <marker id="arr-green"  markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#059669"/></marker>
+    <marker id="arr-orange" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#c2410c"/></marker>
+  </defs>
+
+  <!-- ===== 连线（先画，垫底） ===== -->
+  <!-- E1 APP ↔ PC后端 : TCP 8888 -->
+  <g class="edge" data-key="e1">
+    <path class="wire" d="M 205 205 L 320 330" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arr-blue)"/>
+    <path d="M 190 200 L 340 340" stroke="transparent" stroke-width="18" fill="none"/>
+    <rect x="185" y="250" width="150" height="30" rx="6" fill="#ffffff" stroke="#2563eb"/>
+    <text x="260" y="270" text-anchor="middle" font-size="12" fill="#1f2937">① TCP 控制帧 :8888</text>
+  </g>
+  <!-- E2 APP → 华为云 : HTTPS -->
+  <g class="edge" data-key="e2">
+    <path class="wire" d="M 390 195 L 555 195" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arr-blue)"/>
+    <path d="M 380 195 L 565 195" stroke="transparent" stroke-width="18" fill="none"/>
+    <rect x="390" y="172" width="170" height="46" rx="6" fill="#ffffff" stroke="#2563eb"/>
+    <text x="475" y="190" text-anchor="middle" font-size="12" fill="#1f2937">② HTTPS 影子轮询/命令</text>
+    <text x="475" y="208" text-anchor="middle" font-size="11" fill="#6b7280">V11-HMAC-SHA256 签名 :443</text>
+  </g>
+  <!-- E3 小车端 ↔ 华为云 : MQTT TLS -->
+  <g class="edge" data-key="e3">
+    <path class="wire" d="M 555 420 L 720 420 L 720 250" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#arr-green)"/>
+    <path d="M 545 420 L 730 420 L 730 240" stroke="transparent" stroke-width="18" fill="none"/>
+    <rect x="590" y="330" width="180" height="46" rx="6" fill="#ffffff" stroke="#059669"/>
+    <text x="680" y="348" text-anchor="middle" font-size="12" fill="#1f2937">③ MQTT over TLS :8883</text>
+    <text x="680" y="366" text-anchor="middle" font-size="11" fill="#6b7280">属性上报↑ / 命令↓ / 回执↑</text>
+  </g>
+  <!-- E4 小车端 ↔ 本地broker -->
+  <g class="edge" data-key="e4">
+    <path class="wire" d="M 460 420 L 460 380" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#arr-green)"/>
+    <path d="M 450 420 L 470 380" stroke="transparent" stroke-width="18" fill="none"/>
+    <rect x="480" y="385" width="120" height="30" rx="6" fill="#ffffff" stroke="#059669"/>
+    <text x="540" y="405" text-anchor="middle" font-size="12" fill="#1f2937">④ MQTT :1883</text>
+  </g>
+  <!-- E5 APP ↔ 本地broker（云端模拟模式） -->
+  <g class="edge" data-key="e5">
+    <path class="wire" d="M 300 250 L 390 350" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="7 4" fill="none" marker-end="url(#arr-blue)"/>
+    <path d="M 290 245 L 400 360" stroke="transparent" stroke-width="18" fill="none"/>
+    <rect x="255" y="288" width="150" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-dasharray="5 3"/>
+    <text x="330" y="308" text-anchor="middle" font-size="12" fill="#1f2937">⑤ MQTT :1883（模拟）</text>
+  </g>
+  <!-- E6 视图端 ← broker/server WS -->
+  <g class="edge" data-key="e6">
+    <path class="wire" d="M 150 480 L 320 480 L 320 400 L 380 400" stroke="#c2410c" stroke-width="2.5" fill="none" marker-end="url(#arr-orange)"/>
+    <path d="M 140 480 L 330 480 L 330 400 L 390 400" stroke="transparent" stroke-width="18" fill="none"/>
+    <rect x="130" y="440" width="200" height="46" rx="6" fill="#ffffff" stroke="#c2410c"/>
+    <text x="230" y="458" text-anchor="middle" font-size="12" fill="#1f2937">⑥ WebSocket :8889 / :8899</text>
+    <text x="230" y="476" text-anchor="middle" font-size="11" fill="#6b7280">state 帧 100ms 广播（只看不控）</text>
+  </g>
+  <!-- E7 华为云 → 本地broker? no. 添加 顶部注释节点连线: APP TCP8889? 视图端在浏览器. done -->
+
+  <!-- ===== 节点 ===== -->
+  <!-- APP端 -->
+  <g class="node" data-key="n1">
+    <rect x="80" y="120" width="280" height="90" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+    <text x="220" y="150" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">① APP 端（鸿蒙）</text>
+    <text x="220" y="172" text-anchor="middle" font-size="12" fill="#475569">ArkTS · ControlPage + Tcp/Mqtt/Http 三客户端</text>
+    <text x="220" y="192" text-anchor="middle" font-size="12" fill="#475569">摇杆 → 死区/低通 → 命令下发 → 状态渲染</text>
+  </g>
+  <!-- 华为云 -->
+  <g class="node" data-key="n2">
+    <rect x="580" y="120" width="280" height="90" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2.5"/>
+    <text x="720" y="150" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">② 华为 IoTDA 云端（真平台）</text>
+    <text x="720" y="172" text-anchor="middle" font-size="12" fill="#475569">设备影子 · 命令队列 · 物模型校验 · 鉴权</text>
+    <text x="720" y="192" text-anchor="middle" font-size="12" fill="#475569">MQTT TLS 8883（设备侧）/ HTTPS 443（应用侧）</text>
+  </g>
+  <!-- PC后端 -->
+  <g class="node" data-key="n3">
+    <rect x="330" y="330" width="170" height="70" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+    <text x="415" y="356" text-anchor="middle" font-size="15" font-weight="bold" fill="#1f2937">③ PC 后端服务</text>
+    <text x="415" y="376" text-anchor="middle" font-size="12" fill="#475569">car_server(8888/8889)</text>
+    <text x="415" y="392" text-anchor="middle" font-size="12" fill="#475569">mqtt_broker(1883/8899)</text>
+  </g>
+  <!-- 小车端 -->
+  <g class="node" data-key="n4">
+    <rect x="330" y="440" width="240" height="80" rx="10" fill="#fff7ed" stroke="#c2410c" stroke-width="2.5"/>
+    <text x="450" y="466" text-anchor="middle" font-size="15" font-weight="bold" fill="#1f2937">④ 模拟小车端</text>
+    <text x="450" y="488" text-anchor="middle" font-size="12" fill="#475569">car_mqtt_device.py + car_model.py</text>
+    <text x="450" y="506" text-anchor="middle" font-size="12" fill="#475569">两档：接本地 broker（local）/ 接真平台（real）</text>
+  </g>
+  <!-- 视图端 -->
+  <g class="node" data-key="n5">
+    <rect x="60" y="440" width="240" height="80" rx="10" fill="#f0fdfa" stroke="#0d9488" stroke-width="2.5"/>
+    <text x="180" y="466" text-anchor="middle" font-size="15" font-weight="bold" fill="#1f2937">⑤ 轨迹视图端（浏览器）</text>
+    <text x="180" y="488" text-anchor="middle" font-size="12" fill="#475569">webview.html · Canvas 俯视图</text>
+    <text x="180" y="506" text-anchor="middle" font-size="12" fill="#475569">WebSocket 只收 state，不发控制</text>
+  </g>
+
+  <!-- 图例 -->
+  <g font-size="12">
+    <text x="80" y="70" font-weight="bold" font-size="14">图例</text>
+    <text class="pill" x="80" y="92"><tspan fill="#2563eb">━</tspan><tspan fill="#475569">命令下行（控制）</tspan></text>
+    <text class="pill" x="240" y="92"><tspan fill="#059669">━</tspan><tspan fill="#475569">属性/回执上行（数据）</tspan></text>
+    <text class="pill" x="420" y="92"><tspan fill="#c2410c">━</tspan><tspan fill="#475569">视图广播</tspan></text>
+    <text class="pill" x="560" y="92"><tspan fill="#6b7280">╌</tspan><tspan fill="#475569">本地模拟拓扑（演示用，真平台跑通后可弃）</tspan></text>
+    <text x="80" y="112" fill="#9ca3af">两条运行拓扑：拓扑① 本地全模拟（③④⑤+APP，端口独立）；拓扑② 真平台（④→② TLS，APP→② HTTPS，当前默认）</text>
+  </g>
+</svg>
+</div>
+
+<div id="panel">
+  <h2>使用说明</h2>
+  <p class="meta">点击上方任意<b>节点</b>（五个端）或<b>连线/标签</b>（六条接口链路），此处将展示对应的详细信息。</p>
+</div>
+
+<script>
+const DATA = {
+  n1: { kind: "节点", color: "var(--accent-bg)", title: "① APP 端（鸿蒙 ArkTS）", rows: [
+    ["职责", "摇杆采集 → 滤波（死区0.08 / 一阶低通0.55 / 节流200ms）→ 命令下发；接收状态 → 状态卡 + 俯视图渲染"],
+    ["接入模式", "iot（云端，主）· tcp（直连，隐藏 DEBUG）· cloud（华为云直连，AK/SK 登录页）"],
+    ["关键文件", "entry/src/main/ets/pages/ControlPage.ets；net/{TcpClient.ets, MqttClient.ets, HuaweiCloudClient.ets, IotBridge.ets}；model/CommandProtocol.ets"],
+    ["依赖能力", "@kit.NetworkKit（TCPSocket / TLSSocket / http）；自研 SHA256 / HMAC / Base64 / UTF-8（零第三方库）"],
+    ["寻址", "模拟器 10.0.2.2=宿主机；真机填电脑局域网 IP，与 PC 同一 Wi-Fi"] ]},
+  n2: { kind: "节点", color: "var(--purple-bg)", title: "② 华为 IoTDA 云端（真平台，标准版实例）", rows: [
+    ["职责", "设备接入鉴权（MQTT TLS）、物模型校验、设备影子（reported/desired）、命令下发与状态跟踪"],
+    ["实例信息", "接入域名 1dc089e08c.st1.*.cn-north-4.myhuaweicloud.com；设备侧 MQTTS 8883；应用侧 HTTPS 443"],
+    ["产品/设备", "产品 carCtrl（服务 Car：属性 speed/battery/heading/x/y，命令 move/stop/ping）；设备 {产品ID}_car_001"],
+    ["鉴权体系", "车端：设备密钥 HMAC（hex）；APP：IAM 子用户 AK/SK + V11-HMAC-SHA256 请求签名"],
+    ["关键资产", "物模型 simulator/iotda_car_model.json；车端凭证 simulator/iotda_config.json（敏感勿入库）"] ]},
+  n3: { kind: "节点", color: "var(--green-bg)", title: "③ PC 后端服务（Python 纯标准库）", rows: [
+    ["职责", "本地全模拟拓扑的中枢：TCP 控制服务、MQTT broker（IoTDA 风格鉴权）、俯视图 WS 广播"],
+    ["car_server.py", "TCP :8888（JSON 文本帧控制）+ WS :8889（俯视图广播），状态 100ms 广播"],
+    ["mqtt_broker.py", "MQTT :1883（CONNECT 鉴权/发布路由/通配订阅）+ WS :8899；run_iot.py 一键拉起并打开俯视图"],
+    ["设计", "零第三方依赖（socket/ssl/threading 手写 MQTT、RFC6455 最小 WS 实现）"] ]},
+  n4: { kind: "节点", color: "var(--orange-bg)", title: "④ 模拟小车端（Python 虚拟小车）", rows: [
+    ["职责", "以 MQTT 设备身份接入平台，订阅命令、执行运动学、周期上报属性"],
+    ["car_model.py", "运动学单一真源：位置/朝向/电量积分，转向死区 0.05"],
+    ["双模式", "local → 本地 broker :1883（需 --platform local --device-id car_001 --no-tls）；real → 真平台 :8883 TLS（配置自动加载）"],
+    ["回执", "同步命令实时回 {\"result_code\":0}；命令解析容错（逐段扫描 request_id/command_name，非法帧不崩）"] ]},
+  n5: { kind: "节点", color: "var(--teal-bg)", title: "⑤ 轨迹视图端（浏览器 webview.html）", rows: [
+    ["职责", "Canvas 绘制俯视图：小车位置/朝向/轨迹，纯只读"],
+    ["连接", "WebSocket ws://{host}:{port}/，只处理 type==\"state\" 帧"],
+    ["数据源", "拓扑①：car_server :8889；拓扑②（本地模拟）：mqtt_broker :8899（run_iot.py 自动打开页面）"],
+    ["安全", "不提供任何控制入口（只看不控）"] ]},
+  e1: { kind: "接口", color: "var(--accent-bg)", title: "① TCP 控制帧（APP ↔ car_server :8888）", rows: [
+    ["协议", "TCP 长连接，JSON 文本帧 + \\n 分帧（UTF-8）"],
+    ["上行", "{\"type\":\"move\",\"seq\":n,\"lx\":0.5,\"ly\":-1.0,\"ts\":...} / stop / ping"],
+    ["下行", "ack{seq,ok} · pong{seq} · state{speed,battery,heading,x,y}(100ms) · error{msg}"],
+    ["现状", "隐藏 DEBUG 模式保留（ENABLE_TCP_DEBUG），帧编解码与云端模式共用 CommandProtocol"] ]},
+  e2: { kind: "接口", color: "var(--accent-bg)", title: "② 应用侧 HTTPS（APP ↔ 华为云 :443）", rows: [
+    ["鉴权", "IAM 子用户 AK/SK，每请求独立 V11-HMAC-SHA256 签名（HKDF 派生，服务名 iotdm），必带头 X-Project-Id / X-Sdk-Date"],
+    ["GET 影子", "/v5/iot/{pid}/devices/{dev}/shadow → 200 影子快照（读缓存，离线可查），APP 1s 轮询"],
+    ["POST 命令", "/v5/iot/{pid}/devices/{dev}/commands，body={service_id,command_name,paras} → 200 {response:{result_code:0}}，设备须在线"],
+    ["实测坑", "async-commands 不支持 MQTT 设备（IOTDA.014114）；send_strategy 必填（IOTDA.000006）"] ]},
+  e3: { kind: "接口", color: "var(--green-bg)", title: "③ MQTT over TLS（车端 ↔ 华为云 :8883）", rows: [
+    ["鉴权", "clientId={deviceId}_0_{sig}_{ts}（ts=UTC YYYYMMDDHH），username={deviceId}，password=HMAC-SHA256(key=ts, msg=secret).hexdigest()"],
+    ["下行", "$oc/devices/{dev}/sys/commands/request_id={rid}/command_name={name}"],
+    ["上行", "属性 .../properties/report；命令回执 .../commands/response/request_id={rid} {result_code:0}"],
+    ["约束", "同 deviceId 仅一条连接（互踢）；重连空窗 IOTDA.014111 重发即可"] ]},
+  e4: { kind: "接口", color: "var(--green-bg)", title: "④ MQTT 明文（车端 ↔ 本地 broker :1883）", rows: [
+    ["鉴权", "教学模板：password=Base64(HMAC-SHA256(key=secret, msg=\"HMAC-SHA256 {id} {ts}\"))，clientId={id}_{ts}；设备/应用双注册表"],
+    ["topic", "与真平台同构（IoTDA 风格），命令/属性/回执三 topic 一致"],
+    ["用途", "教学与联调：无 TLS 便于抓包观察 MQTT 报文"] ]},
+  e5: { kind: "接口", color: "var(--accent-bg)", title: "⑤ MQTT 明文（APP ↔ 本地 broker :1883，模拟拓扑）", rows: [
+    ["身份", "应用身份 app_controller（APP_REGISTRY），与设备身份分离鉴权"],
+    ["订阅", "$oc/devices/car_001/sys/commands/# 与 .../commands/response/#（命令回执确认）"],
+    ["发布", "命令 topic（move/stop/ping），payload 同真平台结构"],
+    ["现状", "云模式优先后，此路径为模块④教学实现，被华为云 HTTPS 直连（②）取代为默认"] ]},
+  e6: { kind: "接口", color: "var(--orange-bg)", title: "⑥ WebSocket 状态广播（视图端 ↔ PC :8889/:8899）", rows: [
+    ["握手", "HTTP Upgrade → ws://{host}:{port}/"],
+    ["帧", "下行 100ms {\"type\":\"state\",\"speed\":..,\"battery\":..,\"heading\":..,\"x\":..,\"y\":..}；无上行业务帧"],
+    ["实现", "服务端为自研 RFC6455 最小子集（握手+帧编解码），客户端为浏览器原生 WebSocket"] ]}
+};
+const panel = document.getElementById('panel');
+function show(key, el) {
+  document.querySelectorAll('.node.selected, .edge.selected').forEach(e => e.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  const d = DATA[key]; if (!d) return;
+  let html = `<h2><span class="kind" style="background:${d.color};border:1px solid var(--line)">${d.kind}</span> ${d.title}</h2><table>`;
+  d.rows.forEach(r => html += `<tr><th>${r[0]}</th><td>${r[1]}</td></tr>`);
+  panel.innerHTML = html + '</table>';
+}
+document.querySelectorAll('.node').forEach(el =>
+  el.addEventListener('click', () => show(el.dataset.key, el)));
+document.querySelectorAll('.edge').forEach(el =>
+  el.addEventListener('click', () => show(el.dataset.key, el)));
+</script>
+</body>
+</html>

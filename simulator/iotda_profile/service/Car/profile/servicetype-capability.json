@@ -1,0 +1,110 @@
+{
+  "services": [
+    {
+      "serviceType": "Car",
+      "description": "全场景智能寻检车：运动控制与状态上报",
+      "commands": [
+        {
+          "commandName": "move",
+          "paras": [
+            {
+              "paraName": "lx",
+              "dataType": "decimal",
+              "required": true,
+              "min": -1,
+              "max": 1,
+              "step": 0,
+              "maxLength": 0,
+              "unit": "",
+              "enumList": null
+            },
+            {
+              "paraName": "ly",
+              "dataType": "decimal",
+              "required": true,
+              "min": -1,
+              "max": 1,
+              "step": 0,
+              "maxLength": 0,
+              "unit": "",
+              "enumList": null
+            }
+          ],
+          "responses": []
+        },
+        {
+          "commandName": "stop",
+          "paras": [],
+          "responses": []
+        },
+        {
+          "commandName": "ping",
+          "paras": [],
+          "responses": []
+        }
+      ],
+      "properties": [
+        {
+          "propertyName": "speed",
+          "dataType": "decimal",
+          "required": false,
+          "min": -1,
+          "max": 1,
+          "step": 0,
+          "maxLength": 0,
+          "method": "R",
+          "unit": "m/s",
+          "enumList": null
+        },
+        {
+          "propertyName": "battery",
+          "dataType": "decimal",
+          "required": false,
+          "min": 0,
+          "max": 100,
+          "step": 0,
+          "maxLength": 0,
+          "method": "R",
+          "unit": "%",
+          "enumList": null
+        },
+        {
+          "propertyName": "heading",
+          "dataType": "decimal",
+          "required": false,
+          "min": 0,
+          "max": 360,
+          "step": 0,
+          "maxLength": 0,
+          "method": "R",
+          "unit": "deg",
+          "enumList": null
+        },
+        {
+          "propertyName": "x",
+          "dataType": "decimal",
+          "required": false,
+          "min": -1000,
+          "max": 1000,
+          "step": 0,
+          "maxLength": 0,
+          "method": "R",
+          "unit": "m",
+          "enumList": null
+        },
+        {
+          "propertyName": "y",
+          "dataType": "decimal",
+          "required": false,
+          "min": -1000,
+          "max": 1000,
+          "step": 0,
+          "maxLength": 0,
+          "method": "R",
+          "unit": "m",
+          "enumList": null
+        }
+      ]
+    }
+  ]
+}

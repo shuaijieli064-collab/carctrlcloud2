@@ -1,0 +1,18 @@
+{
+  "devices": [
+    {
+      "manufacturerId": "Nox7th",
+      "manufacturerName": "Nox7th",
+      "protocolType": "MQTT",
+      "deviceType": "CarCtrl",
+      "omCapability": null,
+      "serviceTypeCapabilities": [
+        {
+          "serviceId": "Car",
+          "serviceType": "Car",
+          "option": "Master"
+        }
+      ]
+    }
+  ]
+}

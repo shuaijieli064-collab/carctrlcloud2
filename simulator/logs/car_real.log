@@ -1,0 +1,166 @@
+[BOOT] 车端设备 6ae6e66a7f2e6c302fa8ffd1_car_001 接入 华为云 IoTDA 1dc089e08c.st1.iotda-device.cn-north-4.myhuaweicloud.com:8883(TLS) ...
+[AUTH] clientId=6ae6e66a7f2e6c302fa8ffd1_car_001_0_0_2026111403
+[READY] 已订阅命令，开始上报属性（每 100ms）；可在 IoTDA 控制台"设备-实时状态/在线调试"查看
+[MQTT] SUBACK codes=[1]
+[CMD ] stop  (rid=1a2904d7-efaf-4532-907d-6ea80a42cede)
+[CMD ] move lx=+0.00 ly=-0.05  (rid=a688c0d9-8e4b-4550-adf8-2b0947f8c796)
+[CMD ] move lx=-0.06 ly=-0.27  (rid=aa06eae5-ada8-444f-84b8-4964c7a720dd)
+[CMD ] move lx=-0.10 ly=-0.41  (rid=47e08b7e-6311-44a6-921c-844f72632b0f)
+[CMD ] move lx=-0.22 ly=-0.43  (rid=a54cc162-6765-4ace-9ae7-39295676416e)
+[CMD ] move lx=-0.28 ly=-0.45  (rid=a9d146cf-cca7-49f2-afc7-31e531348992)
+[CMD ] move lx=+0.06 ly=-0.63  (rid=059564bc-58ea-4e09-b2a2-73768456ba55)
+[CMD ] move lx=+0.26 ly=-0.70  (rid=8751f7ec-3e24-4c5c-93fb-8ff4b59d652f)
+[CMD ] stop  (rid=082ea06e-3708-4350-a89e-d26171391fca)
+[CMD ] move lx=+0.00 ly=-0.07  (rid=237776eb-54f0-42c3-83e8-5a9c09e84b35)
+[CMD ] move lx=+0.00 ly=-0.58  (rid=a5b2e1d9-e856-4ebb-96c6-34afd4b6ba87)
+[CMD ] move lx=+0.00 ly=-0.81  (rid=62b89a13-b0f8-4637-b1ca-2008f6e72a6f)
+[CMD ] move lx=+0.00 ly=-0.91  (rid=e466eddb-ef72-4541-8a10-c8343da764c4)
+[CMD ] move lx=+0.00 ly=-0.96  (rid=2cb1099d-5d2e-49db-895b-0229e14ec22b)
+[CMD ] move lx=+0.00 ly=-0.98  (rid=811f07db-1168-4852-a9ee-c5e7b9211f93)
+[CMD ] move lx=-0.04 ly=-0.99  (rid=c5fcaa9a-8529-47d7-aa94-05a7ce71bea3)
+[CMD ] move lx=-0.07 ly=-0.99  (rid=cb0906e2-8736-442a-bd98-d4707d63f98c)
+[CMD ] move lx=-0.09 ly=-0.99  (rid=6f4a9eed-dc39-4dda-afde-e8246df29969)
+[CMD ] move lx=-0.04 ly=-0.99  (rid=28393a62-a4ad-46b3-b2d9-80802ce7b626)
+[CMD ] move lx=-0.02 ly=-0.87  (rid=315bf6b4-7bc8-4e60-8658-69c9f443209a)
+[CMD ] move lx=-0.01 ly=-0.80  (rid=7347acf0-00d5-49b7-a55e-c1f2a670280c)
+[CMD ] move lx=-0.31 ly=-0.77  (rid=3cdd38df-2b09-4578-b734-b5371578ae82)
+[CMD ] move lx=-0.62 ly=-0.61  (rid=04702592-a87c-414d-961d-9605487158f3)
+[CMD ] move lx=-0.78 ly=-0.50  (rid=07394bb2-3de1-412a-bec5-b8a54db06792)
+[CMD ] move lx=-0.89 ly=-0.10  (rid=eebc4441-9000-400b-8c9b-0c1a3494c9e6)
+[CMD ] move lx=-0.80 ly=+0.33  (rid=2c1eed0d-2f87-4fa2-a943-ecff9bb85dee)
+[CMD ] move lx=-0.46 ly=+0.69  (rid=64e738c9-e46f-4a03-805a-e3d632e99962)
+[CMD ] move lx=-0.26 ly=+0.86  (rid=24670a3f-9f95-4837-8a78-046b309429a6)
+[CMD ] move lx=-0.12 ly=+0.93  (rid=79f7286f-1892-445c-968e-65bc33373670)
+[CMD ] move lx=+0.22 ly=+0.90  (rid=c2e0ac92-560f-4d46-8ab2-2718779e0924)
+[CMD ] move lx=+0.55 ly=+0.72  (rid=7af4cd33-0393-459c-a342-89733b390852)
+[CMD ] move lx=+0.74 ly=+0.57  (rid=93138604-ea00-439e-b3ba-0c2dfb091fd0)
+[CMD ] stop  (rid=b61b4a96-34a7-441b-b3c6-9eecb0cff23e)
+[CMD ] move lx=+0.00 ly=-0.07  (rid=7c4c3159-cd62-4ec6-b9ba-4da709e69c0b)
+[CMD ] move lx=+0.05 ly=-0.58  (rid=9b0a5c79-aaba-46ff-8e4b-8e765134daa1)
+[CMD ] move lx=+0.02 ly=-0.81  (rid=053c0cb8-9308-40be-99a6-5bb2a72abd63)
+[CMD ] move lx=+0.01 ly=-0.91  (rid=fd4c5f48-d32c-4e06-9a2b-21494f063434)
+[CMD ] move lx=+0.00 ly=-0.96  (rid=0b358859-25f8-4695-a14f-b31cb806c147)
+[CMD ] move lx=+0.00 ly=-0.85  (rid=b5f88ed9-0b61-45ad-8430-48aa73d63057)
+[CMD ] move lx=+0.00 ly=-0.72  (rid=f969bc3c-6e47-4bfb-ad06-3762365bac64)
+[CMD ] stop  (rid=de42c6d3-2b5c-4a2b-8db2-71ffff415a65)
+
+[WARN] 连接断开，5s 后自动重连...
+[READY] 重连成功，恢复属性上报
+[MQTT] SUBACK codes=[1]
+
+[WARN] 连接断开，5s 后自动重连...
+[READY] 重连成功，恢复属性上报
+[MQTT] SUBACK codes=[1]
+
+[WARN] 连接断开，5s 后自动重连...
+[READY] 重连成功，恢复属性上报
+[MQTT] SUBACK codes=[1]
+
+[WARN] 连接断开，5s 后自动重连...
+[READY] 重连成功，恢复属性上报
+[MQTT] SUBACK codes=[1]
+[CMD ] move lx=+0.00 ly=-0.08  (rid=d47d7f3b-7c0b-4ffa-a199-3aa09a86f5bc)
+[CMD ] move lx=-0.08 ly=-0.42  (rid=e29b58f2-0ccc-4add-8680-e4d43d1d9167)
+[CMD ] move lx=-0.19 ly=-0.54  (rid=86412f86-1eef-4e21-aaca-54da33bdea6c)
+[CMD ] move lx=-0.31 ly=-0.55  (rid=8231e60d-87bb-4710-8459-1a96c5fa5aef)
+[CMD ] move lx=-0.42 ly=-0.50  (rid=3c5ef037-0ab5-406e-babd-e0fb3e60731c)
+[CMD ] move lx=-0.52 ly=-0.40  (rid=db3ea8b6-6a31-4259-b0fe-86145056c6b4)
+[CMD ] move lx=-0.65 ly=-0.07  (rid=e6141312-e6d4-4925-9126-39be22f251bb)
+[CMD ] move lx=-0.63 ly=+0.32  (rid=a0f3e1b0-ad76-4e6a-b5fb-9c52287730aa)
+[CMD ] move lx=-0.16 ly=+0.68  (rid=545649a6-45e5-46ec-875c-f13b0d6a2b8c)
+[CMD ] move lx=+0.36 ly=+0.64  (rid=7ae79082-0351-4dec-9ce8-3e3cfc2f6c5c)
+[CMD ] move lx=+0.69 ly=+0.44  (rid=0724f2c3-337f-4bcd-b780-482270cdd8b4)
+[CMD ] move lx=+0.85 ly=+0.30  (rid=d343dafe-4c09-4f1d-806d-5c07977006b8)
+[CMD ] move lx=+0.91 ly=-0.02  (rid=80aa7e7e-5a22-499c-b8cb-e0958eb56917)
+[CMD ] move lx=+0.74 ly=-0.45  (rid=9940263c-c3b9-4b65-b105-f35522468253)
+[CMD ] stop  (rid=f5a48291-01a6-4988-bb1f-8b0d2a01ab8a)
+[CMD ] move lx=+0.00 ly=-0.08  (rid=c1a23e67-16cb-44bd-ab99-274c9f082d7a)
+[CMD ] move lx=+0.00 ly=-0.58  (rid=58768b95-152b-4522-9c5b-0343cfd947ef)
+[CMD ] move lx=+0.00 ly=-0.81  (rid=ed94a167-0018-42c2-a14a-900dbb64559e)
+[CMD ] move lx=+0.00 ly=-0.92  (rid=b1039e42-2487-4f5e-841c-59a6ef995637)
+[CMD ] move lx=+0.00 ly=-0.96  (rid=6cb8d9ff-9aa2-4adc-8b5c-a592e401d16d)
+[CMD ] move lx=+0.00 ly=-0.98  (rid=27f73037-51f0-4278-bdac-ca094b4448b4)
+[CMD ] move lx=+0.00 ly=-0.99  (rid=26742f5f-6570-4a39-9ada-f3d2d62c4fba)
+[CMD ] move lx=+0.00 ly=-1.00  (rid=60dffd58-e8c8-4970-99e6-611b6b465815)
+[CMD ] stop  (rid=50a2705a-2f32-45e4-a0d1-5bf1ac2f92e7)
+[CMD ] move lx=+0.00 ly=-0.05  (rid=30617abc-9f7f-4d94-8efc-b9b50c5f6950)
+[CMD ] move lx=-0.17 ly=-0.50  (rid=2aa152ad-5c32-498b-bfbf-0cbebe757c3d)
+[CMD ] move lx=-0.20 ly=-0.76  (rid=ab8e5c76-1c72-4031-9261-f8cfe70fd6be)
+[CMD ] move lx=-0.21 ly=-0.88  (rid=10d45920-a3a7-4721-9c89-dba4dd661da6)
+[CMD ] stop  (rid=6fc3b1b4-e8d4-46ce-b213-4fd906e91269)
+[CMD ] move lx=+0.00 ly=-0.08  (rid=92f6c822-c39d-4692-a8b9-e617a2543c9a)
+[CMD ] move lx=-0.05 ly=-0.58  (rid=4187a280-52e2-4db6-8e41-04fb2784f98b)
+[CMD ] move lx=-0.02 ly=-0.81  (rid=ffe85c4a-6772-4f0e-9ecd-83de8079ea8f)
+[CMD ] move lx=-0.01 ly=-0.91  (rid=8dcf86d6-b0dd-4518-8057-1f4c5d994247)
+[CMD ] move lx=+0.11 ly=-0.95  (rid=988b2db8-bf8a-4636-9e96-8b99c1bd681c)
+[CMD ] move lx=+0.21 ly=-0.95  (rid=52b71427-1d9e-41a0-aebe-54456dd54654)
+[CMD ] stop  (rid=296c99a7-e054-4345-a449-c0fb42d39fc4)
+[CMD ] move lx=+0.00 ly=-0.05  (rid=0fe86a3c-5a3f-422a-b11f-3ef060031a26)
+[CMD ] move lx=+0.00 ly=-0.55  (rid=5b55595c-7bec-42a3-919f-fe8b66563019)
+[CMD ] move lx=+0.00 ly=-0.80  (rid=070cc7cd-8fd3-4848-9e45-981e17bb12ab)
+[CMD ] move lx=+0.00 ly=-0.91  (rid=1301e066-6f9e-4bde-8533-80cefb3abdac)
+[CMD ] move lx=+0.08 ly=-0.58  (rid=4757a029-acc9-4025-a747-c32666f9ff94)
+[CMD ] move lx=+0.15 ly=-0.15  (rid=286d04a6-13c6-487a-a505-da1f935d15da)
+[CMD ] move lx=+0.19 ly=+0.24  (rid=160350b4-2b98-4d82-ab0c-024ada8a9f67)
+[CMD ] move lx=+0.21 ly=+0.47  (rid=35fb3656-870c-48a2-94a6-1937ac763ab6)
+[CMD ] move lx=-0.45 ly=+0.31  (rid=72b2d9c0-1f0b-46fc-8a42-9b2e1bc1de17)
+[CMD ] move lx=-0.75 ly=+0.18  (rid=f00e7881-8a69-480a-9a4c-688482472129)
+[CMD ] move lx=-0.89 ly=+0.08  (rid=1a7a2768-744c-4bfe-a40d-af5780c8dceb)
+[CMD ] move lx=-0.95 ly=+0.04  (rid=d1bf05a3-00f9-4926-9d96-52cc3a44f0b2)
+[CMD ] move lx=-0.43 ly=-0.09  (rid=c1d53179-3ca2-46f6-989d-826e8c5df403)
+[CMD ] move lx=+0.36 ly=-0.04  (rid=ace66249-35ce-43eb-9c9a-8636c91b1aa9)
+[CMD ] move lx=+0.71 ly=-0.02  (rid=f74aa4c4-df1a-4ac2-ad6f-3893b4b15c7b)
+[CMD ] move lx=+0.63 ly=-0.20  (rid=fbe2df7c-780f-4149-9bda-8952e7092a3a)
+[CMD ] move lx=+0.00 ly=-0.30  (rid=dde32145-3463-4edb-adf7-56321d42ee6d)
+[CMD ] move lx=+0.51 ly=-0.34  (rid=076a248b-f58d-4bc1-b150-b1541ca87282)
+[CMD ] move lx=+0.00 ly=-0.65  (rid=39fd62b3-c715-4120-9d37-ace325a032fa)
+[CMD ] move lx=+0.34 ly=-0.71  (rid=cca97301-4c3e-403d-806a-804477befa2d)
+[CMD ] stop  (rid=b8c1fda4-2fce-4da5-8eaf-890931d61a71)
+[CMD ] move lx=-0.39 ly=-0.56  (rid=e5f9db75-aeb7-42b4-a249-902e1d8f176c)
+[CMD ] move lx=+0.69 ly=-0.29  (rid=31bdbde5-13e9-4db8-bba4-80c907f1c577)
+[CMD ] move lx=+0.35 ly=-0.43  (rid=1b532675-ff7e-4687-a687-388bf38d7d48)
+[CMD ] move lx=+0.00 ly=+0.00  (rid=3fb2da1c-bcbd-49d2-9196-822c81c94dc8)
+[CMD ] move lx=+0.00 ly=-0.63  (rid=1d26a123-e937-419e-b2da-657d2f3019b8)
+[CMD ] move lx=+0.18 ly=-0.64  (rid=232672eb-e8f9-45ae-9d8f-9920edee0353)
+[CMD ] move lx=+0.00 ly=-0.61  (rid=abfee7c4-5d72-4c4f-9b6d-d21f4cece064)
+[CMD ] move lx=+0.43 ly=-0.15  (rid=b1698863-8014-492c-8f41-24f891d2811c)
+[CMD ] move lx=+0.00 ly=-0.60  (rid=3e5f9031-a81a-4016-af06-a1a036834d04)
+[CMD ] move lx=-0.18 ly=-0.36  (rid=0602755a-04cf-47ce-967a-fed22365537c)
+[CMD ] move lx=+0.00 ly=-0.06  (rid=955eca30-84bb-48b2-ad21-309d18e861c6)
+[CMD ] stop  (rid=f1c1a332-f035-4a48-ab15-56660a44f28d)
+[CMD ] move lx=+0.00 ly=-0.41  (rid=0b504f8d-a336-4947-b1ac-d64fd7fc0559)
+[CMD ] move lx=+0.60 ly=-0.10  (rid=25b8a526-d38b-4387-96b5-73d4d590489c)
+[CMD ] move lx=+0.91 ly=-0.25  (rid=d60eff82-0b74-4ca6-9ac2-11f7f2232775)
+[CMD ] move lx=+0.00 ly=-0.29  (rid=dedcb472-5da4-4e65-8bd5-f912cb078451)
+[CMD ] move lx=+0.31 ly=-0.22  (rid=84dcb920-1100-4951-93c6-fa4f332f7ae5)
+[CMD ] move lx=+0.44 ly=-0.81  (rid=27aba2e6-ee9f-44ad-99d9-208dae14bd88)
+[CMD ] move lx=+0.09 ly=-0.91  (rid=85329de4-5e28-455f-b67d-43f86788362a)
+[CMD ] move lx=+0.90 ly=-0.09  (rid=2754e1a8-a58f-4037-9fc2-2e263d0accd2)
+[CMD ] move lx=+0.00 ly=-0.34  (rid=7668123d-ddfd-48cf-bcba-d3978eddc463)
+[CMD ] move lx=+0.52 ly=-0.84  (rid=62f85669-8014-45b3-9cac-19c4e37f507d)
+[CMD ] move lx=+0.74 ly=-0.61  (rid=1a57be97-1c0e-4b4b-8155-eb8b2731419e)
+[CMD ] move lx=+0.00 ly=-0.34  (rid=26faae43-36db-41d8-a0c7-d3e4a60fd8bc)
+[CMD ] move lx=+0.13 ly=-0.95  (rid=d258d783-75ee-414f-9aa1-df35b2b3f32e)
+[CMD ] move lx=+0.45 ly=-0.87  (rid=70999d56-1a45-4296-a9df-2e4666165acd)
+[CMD ] move lx=+0.87 ly=-0.42  (rid=22029b2b-50e0-4155-a4d7-ae02480bafa4)
+[CMD ] move lx=+0.58 ly=-0.81  (rid=4e0f8dbf-904c-4fea-bf9e-d19ad293b173)
+[CMD ] move lx=+0.31 ly=-0.92  (rid=6ad6d9fe-b9db-4ec0-bb79-3bfc8af78374)
+[CMD ] move lx=+0.58 ly=-0.81  (rid=b4ba15d3-46b2-4896-be19-121691de8e98)
+[CMD ] move lx=-0.06 ly=-0.95  (rid=37e8b29d-84a8-4e06-b9f3-22bfadab5f69)
+[CMD ] move lx=+0.66 ly=-0.75  (rid=05847d77-ca28-4370-8a05-ecec28382122)
+[CMD ] stop  (rid=e2df0bf3-5a4f-4a03-9a75-6461e98aefac)
+[CMD ] move lx=+0.58 ly=-0.81  (rid=6488c6e8-fdd5-4388-8270-33011040854f)
+[CMD ] move lx=+0.61 ly=-0.79  (rid=b6d4f12a-9f09-4f10-b7e0-29d00d99dfd5)
+[CMD ] move lx=+0.78 ly=-0.04  (rid=6c2be7ba-dc73-4367-a893-bb3d45552e4b)
+
+[WARN] 连接断开，5s 后自动重连...
+[READY] 重连成功，恢复属性上报
+[MQTT] SUBACK codes=[1]
+
+[WARN] 连接断开，5s 后自动重连...
+[READY] 重连成功，恢复属性上报
+[MQTT] SUBACK codes=[1]
+
+[WARN] 连接断开，5s 后自动重连...
+[READY] 重连成功，恢复属性上报
+[MQTT] SUBACK codes=[1]

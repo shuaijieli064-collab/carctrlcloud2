@@ -1,0 +1,57 @@
+[BOOT] 车端设备 car_001 接入 本地模拟 broker 127.0.0.1:1883 ...
+[AUTH] clientId=car_001_1794618836
+[READY] 已订阅命令，开始上报属性（每 100ms）；可在 IoTDA 控制台"设备-实时状态/在线调试"查看
+[MQTT] SUBACK codes=[0]
+[CMD ] move lx=+0.00 ly=-1.00  (rid=req_1794618874213)
+[CMD ] stop  (rid=req_1794618876214)
+[CMD ] move lx=+0.60 ly=+0.00  (rid=req_1794618877214)
+[CMD ] stop  (rid=req_1794618879215)
+[CMD ] ping  (rid=req_1794618879716)
+[WARN] 无法解析命令 topic=$oc/devices/car_001/sys/commands/request_id=req_1794618880317/command_name=move payload=this-is-not-json
+[CMD ] REJECT move 缺少数值型 lx/ly  (rid=req_1794618880917)
+[CMD ] stop  (rid=req_1794618881518)
+[CMD ] move lx=+0.00 ly=-1.00  (rid=req_1794619386677)
+[CMD ] stop  (rid=req_1794619388677)
+[CMD ] move lx=+0.60 ly=+0.00  (rid=req_1794619389678)
+[CMD ] stop  (rid=req_1794619391678)
+[CMD ] ping  (rid=req_1794619392179)
+[WARN] 无法解析命令 topic=$oc/devices/car_001/sys/commands/request_id=req_1794619392779/command_name=move payload=this-is-not-json
+[CMD ] REJECT move 缺少数值型 lx/ly  (rid=req_1794619393380)
+[CMD ] stop  (rid=req_1794619393980)
+[CMD ] move lx=+0.00 ly=-1.00  (rid=req_1794619466896)
+[CMD ] stop  (rid=req_1794619468896)
+[CMD ] move lx=+0.60 ly=+0.00  (rid=req_1794619469897)
+[CMD ] stop  (rid=req_1794619471897)
+[CMD ] ping  (rid=req_1794619472398)
+[WARN] 无法解析命令 topic=$oc/devices/car_001/sys/commands/request_id=req_1794619472999/command_name=move payload=this-is-not-json
+[CMD ] REJECT move 缺少数值型 lx/ly  (rid=req_1794619473599)
+[CMD ] stop  (rid=req_1794619474199)
+[CMD ] move lx=+0.00 ly=-1.00  (rid=req_1794619518642)
+[CMD ] stop  (rid=req_1794619520642)
+[CMD ] move lx=+0.60 ly=+0.00  (rid=req_1794619521643)
+[CMD ] stop  (rid=req_1794619523644)
+[CMD ] ping  (rid=req_1794619524144)
+[WARN] 无法解析命令 topic=$oc/devices/car_001/sys/commands/request_id=req_1794619524745/command_name=move payload=this-is-not-json
+[CMD ] REJECT move 缺少数值型 lx/ly  (rid=req_1794619525345)
+[CMD ] stop  (rid=req_1794619525946)
+Traceback (most recent call last):
+  File "D:\hong_meng\carctrlcloud2\simulator\car_mqtt_device.py", line 162, in main
+    client.publish(report_topic, proto.encode_property_report(snap), qos=0)
+  File "D:\hong_meng\carctrlcloud2\simulator\mqtt_client.py", line 114, in publish
+    self._send(3, (qos << 1), body)
+  File "D:\hong_meng\carctrlcloud2\simulator\mqtt_client.py", line 50, in _send
+    self.sock.sendall(packet)
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\hong_meng\carctrlcloud2\simulator\car_mqtt_device.py", line 171, in <module>
+    main()
+  File "D:\hong_meng\carctrlcloud2\simulator\car_mqtt_device.py", line 167, in main
+    client.disconnect()
+  File "D:\hong_meng\carctrlcloud2\simulator\mqtt_client.py", line 120, in disconnect
+    self._send(14, 0, b"")
+  File "D:\hong_meng\carctrlcloud2\simulator\mqtt_client.py", line 50, in _send
+    self.sock.sendall(packet)
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
